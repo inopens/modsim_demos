@@ -2,6 +2,5 @@ numpy==1.13.3
 pandas==0.21.0
 matplotlib==1.5.3
 seaborn==0.8.1
-#scipy==0.15.1
 ipython[all]==3.2.0
 ipywidgets==5.0
