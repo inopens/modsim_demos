@@ -1,11 +1,11 @@
 """
-Functies gebruikt voor vb Monod model
+Functies gebruikt voor vb force model
 
 Ingmar Nopens
 """
 # Importeren van functionaliteiten
 import matplotlib.pyplot as plt
-import seaborn as  sns
+#import seaborn as  sns
 import numpy as np
 import pandas as pd
 

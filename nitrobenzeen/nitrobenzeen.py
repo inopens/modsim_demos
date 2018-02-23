@@ -1,11 +1,11 @@
 """
-Functies gebruikt voor vb populatiemodel
+Functies gebruikt voor vb nitrobenzeen
 
 Ingmar Nopens
 """
 # Importeren van functionaliteiten
 import matplotlib.pyplot as plt
-import seaborn as  sns
+#import seaborn as  sns
 import numpy as np
 import pandas as pd
 
