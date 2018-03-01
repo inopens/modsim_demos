@@ -47,7 +47,7 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False,
     else: return modeloutput
 
 def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
-                  perturbatie=0.0001, **kwargs):
+                  perturbatie=0.0001, soort='absoluut', **kwargs):
     """
     Berekent de gevoeligheidsfunctie(s) van de modeloutput(s) naar één bepaalde parameter
 
@@ -74,7 +74,8 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
     kwargs: dict
         functie specifieke parameters
     """
-
+    res_basis = model(tijdstappen, init, varnames, f, returnDataFrame=True,
+                     plotresults=False, **kwargs)
     parameterwaarde_basis = kwargs.pop(parameternaam)
     kwargs[parameternaam] = (1 + perturbatie) * parameterwaarde_basis
     res_hoog = model(tijdstappen, init, varnames, f, returnDataFrame=True,
@@ -82,4 +83,16 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
     kwargs[parameternaam] = (1 - perturbatie) * parameterwaarde_basis
     res_laag = model(tijdstappen, init, varnames, f, returnDataFrame=True,
                      plotresults=False, **kwargs)
-    return (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)
+    if soort == 'absoluut':
+        sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)
+
+    if soort == 'relatief parameter':
+            sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)*parameterwaarde_basis
+
+    if soort == 'relatief variabele':
+        sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)/res_basis
+
+    if soort == 'relatief totaal':
+        sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)*parameterwaarde_basis/res_basis
+
+    return sens
