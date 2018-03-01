@@ -1,0 +1,8 @@
+general_functions.model(
+    np.arange(0, 1500, 1), # tijdstappen
+    [0.03, 0, 0], # initiële condities
+    ['C6H6','N2O5', 'C6H5NO2'], # namen variabelen
+    functie_afgeleiden, # naam functie afgeleiden
+    returnDataFrame=True, plotresults=True,
+    # vanaf hier: functie specifieke parameters
+    k=2, Q=10, V=3000, C6H6_in=0, N2O5_in=0.03)
