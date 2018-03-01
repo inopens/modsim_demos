@@ -1,0 +1,10 @@
+general_functions.model(
+    np.arange(0, 100, 10), # tijdstappen
+    [ 0, 0, 310], # initiële condities
+    ['N2O5','N2O4','T'], # namen variabelen
+    functie_afgeleiden, # naam functie afgeleiden
+    returnDataFrame=True, plotresults=True,
+    # vanaf hier: functie specifieke parameters
+    Ar=1.54e13, Ea=100320, Q=0.5, V=100, rho=0.79,
+    Cp=52.82, U=250, A=2, delta_rH=-6000,
+    N2O5_in=0.02, N2O4_in=0, Tin=250, Tw=330)
