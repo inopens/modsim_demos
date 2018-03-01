@@ -4,3 +4,5 @@ scripts/__pycache__/
 heat_example/\.ipynb_checkpoints/
 
 heat_example/__pycache__/
+
+functions/__pycache__/
