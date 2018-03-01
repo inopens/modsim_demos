@@ -12,7 +12,8 @@ import math
 
 from scipy.integrate import odeint
 
-def model(tijdstappen, init, varnames, f, returnDataFrame=False, **kwargs):
+def model(tijdstappen, init, varnames, f, returnDataFrame=False,
+          plotresults=True, **kwargs):
     """
     Modelimplementatie
 
@@ -41,5 +42,44 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False, **kwargs):
     idx = pd.Index(data=tijdstappen, name='tijd')
     modeloutput = pd.DataFrame(data, index=idx)
 
-    if returnDataFrame: return modeloutput, modeloutput.plot()
-    else: return modeloutput.plot()
+    if (plotresults & (not returnDataFrame)): return modeloutput.plot()
+    elif (plotresults & returnDataFrame): return modeloutput, modeloutput.plot()
+    else: return modeloutput
+
+def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
+                  perturbatie=0.0001, **kwargs):
+    """
+    Berekent de gevoeligheidsfunctie(s) van de modeloutput(s) naar één bepaalde parameter
+
+    Argumenten
+    -----------
+    tijdstappen: np.array
+        array van tijdstappen
+
+    init: list
+        lijst met initiële condities
+
+    varnames: list
+        lijst van strings met namen van de variabelen
+
+    f: function
+        functie die de afgeleiden definieert die opgelost moeten worden
+
+    parameternaam : string
+        naam van de parameter waarvoor de gevoeligheidsfunctie moet opgesteld worden
+
+    perturbatie: float
+        perturbatie van de parameter
+
+    kwargs: dict
+        functie specifieke parameters
+    """
+
+    parameterwaarde_basis = kwargs.pop(parameternaam)
+    kwargs[parameternaam] = (1 + perturbatie) * parameterwaarde_basis
+    res_hoog = model(tijdstappen, init, varnames, f, returnDataFrame=True,
+                     plotresults=False, **kwargs)
+    kwargs[parameternaam] = (1 - perturbatie) * parameterwaarde_basis
+    res_laag = model(tijdstappen, init, varnames, f, returnDataFrame=True,
+                     plotresults=False, **kwargs)
+    return (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)
