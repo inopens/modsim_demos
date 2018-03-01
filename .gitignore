@@ -1,0 +1,6 @@
+
+scripts/__pycache__/
+
+heat_example/\.ipynb_checkpoints/
+
+heat_example/__pycache__/
