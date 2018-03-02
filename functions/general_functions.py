@@ -35,8 +35,6 @@ base_context = {
 
     "xtick.major.pad": 7,
     "ytick.major.pad": 7,
-
-    "figure.figsize": [9, 6]
     }
 
 context = 'notebook'
@@ -56,6 +54,8 @@ plt.rcParams.update(context_dict)
 
 fivethirtyeight = ["#30a2da", "#fc4f30", "#e5ae38", "#6d904f", "#8b8b8b"]
 plt.rcParams['axes.prop_cycle'] = plt.cycler('color', fivethirtyeight)
+
+figsize = (9,6)
 
 def model(tijdstappen, init, varnames, f, returnDataFrame=False,
           plotresults=True, **kwargs):
@@ -88,7 +88,8 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False,
     modeloutput = pd.DataFrame(data, index=idx)
 
     if plotresults:
-        modeloutput.plot();
+        fig, ax = plt.subplots(figsize=figsize)
+        modeloutput.plot(ax=ax);
     if returnDataFrame:
         return modeloutput
 
@@ -141,7 +142,7 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
 
     if soort == 'relatieve totale sensitiviteit':
         sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)*parameterwaarde_basis/res_basis
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     sens.plot(ax=ax)
     ax.set_xlabel('Tijd')
     ax.set_ylabel(soort)
@@ -183,10 +184,8 @@ def track_calib(opt_fun, X, param_names):
 
     return parameters,results
 
-import copy
-
 def plot_calib(parameters, results, i, data, sim_model):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     data.plot(ax=ax, linestyle='', marker='.', markersize=15,
               colors=[fivethirtyeight[0], fivethirtyeight[1]])
     sim = sim_model(parameters.loc[i].values)
@@ -197,7 +196,7 @@ def plot_calib(parameters, results, i, data, sim_model):
     handles, labels = ax.get_legend_handles_labels()
     labels = [l+' simulation' if (i>= data.shape[1]) else l for i, l in enumerate(labels)]
     ax.legend(handles, labels)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=figsize)
     cols = parameters.columns
     c = results - min(results)
     c *= 1/max(c)
