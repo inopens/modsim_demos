@@ -1,8 +1,8 @@
-general_functions.model(
-    np.arange(0, 200000, 100), # tijdstappen
-    [0.00001, 0], # initiële condities
+df_base = general_functions.model(
+    np.arange(0, 100, 1), # tijdstappen
+    [0.00005, 0.02], # initiële condities
     ['X','S'], # namen variabelen
     functie_afgeleiden, # naam functie afgeleiden
     returnDataFrame=True, plotresults=True,
     # vanaf hier: functie specifieke parameters
-    mu_max=0.0003, Q=1, V=5000, Y=0.5, K_S=0.0002, S_in=0.001)
+    mu_max=0.3, Q=2, V=20, Y=0.67, K_S=0.01, S_in=0.02)
