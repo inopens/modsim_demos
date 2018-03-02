@@ -132,16 +132,16 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
     res_laag = model(tijdstappen, init, varnames, f, returnDataFrame=True,
                      plotresults=False, **kwargs)
     if soort == 'absolute sensitiviteit':
-        sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)
+        sens = (res_hoog - res_laag)/(2.*perturbatie)
 
     if soort == 'relatieve sensitiviteit parameter':
-            sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)*parameterwaarde_basis
+            sens = (res_hoog - res_laag)/(2.*perturbatie)*parameterwaarde_basis
 
     if soort == 'relatieve sensitiviteit variabele':
-        sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)/res_basis
+        sens = (res_hoog - res_laag)/(2.*perturbatie)/res_basis
 
     if soort == 'relatieve totale sensitiviteit':
-        sens = (res_hoog - res_laag)/(2.*perturbatie*parameterwaarde_basis)*parameterwaarde_basis/res_basis
+        sens = (res_hoog - res_laag)/(2.*perturbatie)*parameterwaarde_basis/res_basis
     fig, ax = plt.subplots(figsize=figsize)
     sens.plot(ax=ax)
     ax.set_xlabel('Tijd')
