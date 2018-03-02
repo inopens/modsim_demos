@@ -1,0 +1,9 @@
+general_functions.model(
+    np.arange(0., 22, 0.1), # tijdstappen
+    [3, 1000, 1000], # initiële condities
+    ['v','m1', 'm2'], # namen variabelen
+    functie_afgeleiden, # naam functie afgeleiden
+    returnDataFrame=True, plotresults=True,
+    # vanaf hier: functie specifieke parameters
+    r_v=1, K_v=10, K_m=8000, d_nv=0.06, d_n1=0.9, d_n2=1, r_1=14.2, r_2=12.1,
+    alpha_1=0.00005, alpha_2=0.00006, m2_in=100)
