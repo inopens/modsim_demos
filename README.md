@@ -12,3 +12,7 @@ Met behulp van [Binder](https://mybinder.org/) kan het bijna niet gemakkelijker:
 
 ## Met installatie
 Via Anaconda navigator kan je verschillende applicaties starten, zoals Spyder (voor python codering), R-studio, of Jupyter notebooks. Je kan de installatie hier vinden voor verschillende operating systems: https://www.continuum.io/downloads. Open na installatie de applicatie, klik op ‘Launch’ onder jupyter notebook, en de rest wijst zichzelf uit. Je kan de notebooks nu afhalen als zip-map van deze Github pagina en opslaan op je computer.
+
+## Algemeen gebruik
+
+Een cel wordt uitgevoerd met ```shift+enter```, alternatief kan je ook in het menu ```Cell``` op ```Run all``` klikken waarbij alle cellen uitgevoerd zullen worden.
