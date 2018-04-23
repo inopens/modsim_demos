@@ -150,7 +150,7 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
 def sse(simulation, data):
     return np.sum(np.sum((np.atleast_2d(data) - np.atleast_2d(simulation))**2))
 
-def track_calib(opt_fun, X, param_names):
+def track_calib(opt_fun, X, param_names, method='Nelder-Mead', tol=1e-4):
     """
     Optimalisatie m.b.v. het Nelder-Mead algoritme. Alle iteratiestappen worden bijgehouden.
 
@@ -160,6 +160,12 @@ def track_calib(opt_fun, X, param_names):
         optimalisatiefunctie
     X : list
         parameters
+    method : str
+        define the method for optimisation, options are: 'Neder-Mead', 'BFGS',
+        'basinhopping', 'brute', 'differential evolution'
+    tol: float
+        tolerance to determine the endpoint of the optimisation. Is not used in
+        method options 'brute' and 'basinhopping'
 
     Output
     ------
@@ -178,7 +184,18 @@ def track_calib(opt_fun, X, param_names):
         results.append(result) # Tussentijdse SSE bijhouden
         return result
 
-    res = optimize.minimize(internal_opt_fun, X, method='Nelder-Mead')
+    if method in ['Nelder-Mead', 'BFGS']:
+        res = optimize.minimize(internal_opt_fun, X, method=method, tol=tol)
+    elif method == 'basinhopping':
+        res = optimize.basinhopping(internal_opt_fun, X)
+    elif method == 'brute':
+        bounds = [(0.001*i, 100*i) for i in X]
+        res = optimize.brute(internal_opt_fun, bounds)
+    elif method == 'differential evolution':
+        bounds = [(0.001*i, 100*i) for i in X]
+        res = optimize.differential_evolution(internal_opt_fun, bounds, tol=tol)
+    else:
+        raise ValueError('use correct optimisation algorithm, see docstring for options')
     parameters = pd.DataFrame(np.array(parameters), columns=param_names)
     results = np.array(results)
 
@@ -211,3 +228,38 @@ def plot_calib(parameters, results, i, data, sim_model):
     ax.set_ylabel(cols[1])
     ax.set_xlim(0.95*parameters[cols[0]].min(), 1.05*parameters[cols[0]].max())
     ax.set_ylim(0.95*parameters[cols[1]].min(), 1.05*parameters[cols[1]].max())
+
+def plot_contour_monod(optimizer):
+    n_points = 30
+    mu_max = np.logspace(np.log10(0.001), np.log10(50), n_points)
+    K_S = np.logspace(np.log10(0.001), np.log10(10), n_points)
+    X_mu_max, X_K_S = np.meshgrid(mu_max, K_S)
+    Z = np.array([optimizer(params) for params in zip(X_mu_max.flatten(), X_K_S.flatten())])
+    Z = Z.reshape((n_points, n_points))
+    fig, ax = plt.subplots(figsize=(6,5))
+    sc = ax.contourf(X_mu_max, X_K_S, Z, cmap='viridis')
+    cbar = plt.colorbar(sc)
+    cbar.set_ticks([0.05*Z.max(), 0.95*Z.max()])
+    cbar.set_ticklabels(['lage waarde\nobjectieffunctie', 'hoge waarde\nobjectieffunctie'])
+    ax.set_xscale('linear')
+    ax.set_yscale('linear')
+    ax.set_xlabel('mu_max')
+    ax.set_ylabel('K_S')
+
+def plot_contour_force(optimizer):
+    n_points = 30
+    b = np.linspace(0, 2, n_points)
+    k = np.linspace(0, 2, n_points)
+    X_b, X_k = np.meshgrid(b, k)
+    Z = np.array([optimizer(params) for params in zip(X_b.flatten(), X_k.flatten())])
+    Z = np.log10(Z)
+    Z = Z.reshape((n_points, n_points))
+    fig, ax = plt.subplots(figsize=(6,5))
+    sc = ax.contourf(X_b, X_k, Z, cmap='viridis')
+    cbar = plt.colorbar(sc)
+    cbar.set_ticks([0.05*Z.max(), 0.95*Z.max()])
+    cbar.set_ticklabels(['lage waarde\nobjectieffunctie', 'hoge waarde\nobjectieffunctie'])
+    ax.set_xscale('linear')
+    ax.set_yscale('linear')
+    ax.set_xlabel('b')
+    ax.set_ylabel('k')
