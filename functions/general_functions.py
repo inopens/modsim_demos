@@ -161,7 +161,7 @@ def track_calib(opt_fun, X, param_names, method='Nelder-Mead', tol=1e-4):
     X : list
         parameters
     method : str
-        define the method for optimisation, options are: 'Neder-Mead', 'BFGS',
+        define the method for optimisation, options are: 'Neder-Mead', 'BFGS', 'Powell'
         'basinhopping', 'brute', 'differential evolution'
     tol: float
         tolerance to determine the endpoint of the optimisation. Is not used in
@@ -184,7 +184,7 @@ def track_calib(opt_fun, X, param_names, method='Nelder-Mead', tol=1e-4):
         results.append(result) # Tussentijdse SSE bijhouden
         return result
 
-    if method in ['Nelder-Mead', 'BFGS']:
+    if method in ['Nelder-Mead', 'BFGS', 'Powell']:
         res = optimize.minimize(internal_opt_fun, X, method=method, tol=tol)
     elif method == 'basinhopping':
         res = optimize.basinhopping(internal_opt_fun, X)
