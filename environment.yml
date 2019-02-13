@@ -5,7 +5,7 @@ dependencies:
   - numpy=1.11
   - scipy=1.0.0
   - ipython=5.0.0
-  - matplotlib=1.5.1
+  - matplotlib
   - pandas=0.20.3
   - python=3.5.1
   - ipykernel=4.9.0
