@@ -5,7 +5,6 @@ Daan Van Hauwermeiren
 """
 # Importeren van functionaliteiten
 import matplotlib.pyplot as plt
-#import seaborn as  sns
 import numpy as np
 import pandas as pd
 import math
@@ -68,7 +67,7 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False,
         array van tijdstappen
 
     init: list
-        lijst met initiële condities
+        lijst met initiele condities
 
     varnames: list
         lijst van strings met namen van de variabelen
@@ -96,7 +95,7 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False,
 def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
                   log_perturbatie=-4, soort='absoluut', **kwargs):
     """
-    Berekent de gevoeligheidsfunctie(s) van de modeloutput(s) naar één bepaalde parameter
+    Berekent de gevoeligheidsfunctie(s) van de modeloutput(s) naar 1 bepaalde parameter
 
     Argumenten
     -----------
@@ -104,7 +103,7 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
         array van tijdstappen
 
     init: list
-        lijst met initiële condities
+        lijst met initiele condities
 
     varnames: list
         lijst van strings met namen van de variabelen

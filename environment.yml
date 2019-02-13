@@ -1,0 +1,11 @@
+name: py35
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - scipy
+  - ipython
+  - matplotlib
+  - pandas
+  - python=3.5.1
+  - ipykernel
