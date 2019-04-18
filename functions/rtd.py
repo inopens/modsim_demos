@@ -187,6 +187,7 @@ def plot_contour_rtd(optimizer):
     lvls = np.logspace(math.log10(Z.min()), math.log10(Z.max()), 15)
     fig, ax = plt.subplots(figsize=(6,5))
     sc = ax.contourf(X_beta, X_tau_0, Z, cmap='viridis', norm=LogNorm(), levels=lvls)
+    ax.plot(206.003182, 373.223628, marker='o', color='white')
     cbar = plt.colorbar(sc)
     cbar.set_ticks([1.1*Z.min(), 0.8*Z.max()])
     cbar.set_ticklabels(['lage waarde\nobjectieffunctie', 'hoge waarde\nobjectieffunctie'])
