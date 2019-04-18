@@ -7,6 +7,8 @@ Daan Van Hauwermeiren
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+import math
 
 base_context = {
 
@@ -182,10 +184,11 @@ def plot_contour_rtd(optimizer):
     X_beta, X_tau_0 = np.meshgrid(beta, tau_0)
     Z = np.array([optimizer(params) for params in zip(X_beta.flatten(), X_tau_0.flatten())])
     Z = Z.reshape((n_points, n_points))
+    lvls = np.logspace(math.log10(Z.min()), math.log10(Z.max()), 15)
     fig, ax = plt.subplots(figsize=(6,5))
-    sc = ax.contourf(X_beta, X_tau_0, Z, cmap='viridis')
+    sc = ax.contourf(X_beta, X_tau_0, Z, cmap='viridis', norm=LogNorm(), levels=lvls)
     cbar = plt.colorbar(sc)
-    cbar.set_ticks([0.05*Z.max(), 0.95*Z.max()])
+    cbar.set_ticks([1.1*Z.min(), 0.8*Z.max()])
     cbar.set_ticklabels(['lage waarde\nobjectieffunctie', 'hoge waarde\nobjectieffunctie'])
     ax.set_xscale('linear')
     ax.set_yscale('linear')

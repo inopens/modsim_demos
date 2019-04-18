@@ -160,12 +160,11 @@ def track_calib(opt_fun, X, param_names, method='Nelder-Mead', tol=1e-4):
     X : list
         parameters
     method : str
-        define the method for optimisation, options are: 'Neder-Mead', 'BFGS', 'Powell'
+        define the method for optimisation, options are: 'Nelder-Mead', 'BFGS', 'Powell'
         'basinhopping', 'brute', 'differential evolution'
     tol: float
         tolerance to determine the endpoint of the optimisation. Is not used in
         method options 'brute' and 'basinhopping'
-
     Output
     ------
     parameters : DataFrame
@@ -188,10 +187,10 @@ def track_calib(opt_fun, X, param_names, method='Nelder-Mead', tol=1e-4):
     elif method == 'basinhopping':
         res = optimize.basinhopping(internal_opt_fun, X)
     elif method == 'brute':
-        bounds = [(0.001*i, 100*i) for i in X]
+        bounds = [(0.01*i, 10*i) for i in X]
         res = optimize.brute(internal_opt_fun, bounds)
     elif method == 'differential evolution':
-        bounds = [(0.001*i, 100*i) for i in X]
+        bounds = [(0.01*i, 100*i) for i in X]
         res = optimize.differential_evolution(internal_opt_fun, bounds, tol=tol)
     else:
         raise ValueError('use correct optimisation algorithm, see docstring for options')
