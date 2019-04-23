@@ -1,16 +1,14 @@
 """
-algemene functies
+Functies gebruikt voor vb Monod model
 
 Daan Van Hauwermeiren
 """
 # Importeren van functionaliteiten
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import math
-
-from scipy.integrate import odeint
-from scipy import optimize
 
 base_context = {
 
@@ -56,8 +54,23 @@ plt.rcParams['axes.prop_cycle'] = plt.cycler('color', fivethirtyeight)
 
 figsize = (9,6)
 
-def model(tijdstappen, init, varnames, f, returnDataFrame=False,
-          plotresults=True, **kwargs):
+# ----------------------------
+# Implementatie  RTD model
+# ----------------------------
+
+def expon_shifted(t, **kwargs):
+    """
+    $f:=$
+    $0, \forall t < \tau_0$
+    $1 - e^{-(x-\tau_0)/\beta}, \forall t \geq \tau_0$
+    """
+    y = 1 - np.exp(-(t-kwargs["tau_0"])/kwargs["beta"])
+    y[t < kwargs["tau_0"]] = 0
+    return y
+
+
+def calculate_rtd(tijdstappen, model, returnDataFrame=False, plotresults=True,
+                  **kwargs):
     """
     Modelimplementatie
 
@@ -66,14 +79,8 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False,
     tijdstappen: np.array
         array van tijdstappen
 
-    init: list
-        lijst met initiele condities
-
-    varnames: list
-        lijst van strings met namen van de variabelen
-
-    f: function
-        functie die de afgeleiden definieert die opgelost moeten worden
+    model: function
+        functie die de RTD definieert
 
     returnDataFrame: bool
         zet op True om de simulatiedata terug te krijgen
@@ -81,18 +88,19 @@ def model(tijdstappen, init, varnames, f, returnDataFrame=False,
     kwargs: dict
         functie specifieke parameters
     """
-    fvals = odeint(f, init, tijdstappen, args=(kwargs,))
-    data = {col:vals for (col, vals) in zip(varnames, fvals.T)}
-    idx = pd.Index(data=tijdstappen, name='Tijd')
-    modeloutput = pd.DataFrame(data, index=idx)
+    fvals = model(tijdstappen, **kwargs)
+    modeloutput = pd.DataFrame(
+        {"respons": fvals},
+        index=pd.Index(data=tijdstappen, name='Tijd'))
 
     if plotresults:
         fig, ax = plt.subplots(figsize=figsize)
         modeloutput.plot(ax=ax);
+        ax.set_ylim(-0.1, 1.1)
     if returnDataFrame:
         return modeloutput
 
-def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
+def sensitiviteit(tijdstappen, model, parameternaam,
                   log_perturbatie=-4, soort='absoluut', **kwargs):
     """
     Berekent de gevoeligheidsfunctie(s) van de modeloutput(s) naar 1 bepaalde parameter
@@ -102,14 +110,8 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
     tijdstappen: np.array
         array van tijdstappen
 
-    init: list
-        lijst met initiele condities
-
-    varnames: list
-        lijst van strings met namen van de variabelen
-
-    f: function
-        functie die de afgeleiden definieert die opgelost moeten worden
+    model: function
+        functie die de RTD definieert
 
     parameternaam : string
         naam van de parameter waarvoor de gevoeligheidsfunctie moet opgesteld worden
@@ -121,14 +123,14 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
         functie specifieke parameters
     """
     perturbatie = 10**log_perturbatie
-    res_basis = model(tijdstappen, init, varnames, f, returnDataFrame=True,
+    res_basis = calculate_rtd(tijdstappen, model, returnDataFrame=True,
                      plotresults=False, **kwargs)
     parameterwaarde_basis = kwargs.pop(parameternaam)
     kwargs[parameternaam] = (1 + perturbatie) * parameterwaarde_basis
-    res_hoog = model(tijdstappen, init, varnames, f, returnDataFrame=True,
+    res_hoog = calculate_rtd(tijdstappen, model, returnDataFrame=True,
                      plotresults=False, **kwargs)
     kwargs[parameternaam] = (1 - perturbatie) * parameterwaarde_basis
-    res_laag = model(tijdstappen, init, varnames, f, returnDataFrame=True,
+    res_laag = calculate_rtd(tijdstappen, model, returnDataFrame=True,
                      plotresults=False, **kwargs)
     if soort == 'absolute sensitiviteit':
         sens = (res_hoog - res_laag)/(2.*perturbatie)
@@ -146,66 +148,14 @@ def sensitiviteit(tijdstappen, init, varnames, f, parameternaam,
     ax.set_xlabel('Tijd')
     ax.set_ylabel(soort)
 
-def sse(simulation, data):
-    return np.sum(np.sum((np.atleast_2d(data) - np.atleast_2d(simulation))**2))
-
-def track_calib(opt_fun, X, param_names, method='Nelder-Mead', tol=1e-4):
-    """
-    Optimalisatie m.b.v. het Nelder-Mead algoritme. Alle iteratiestappen worden bijgehouden.
-
-    Argumenten
-    ----------
-    opt_fun : function
-        optimalisatiefunctie
-    X : list
-        parameters
-    method : str
-        define the method for optimisation, options are: 'Nelder-Mead', 'BFGS', 'Powell'
-        'basinhopping', 'brute', 'differential evolution'
-    tol: float
-        tolerance to determine the endpoint of the optimisation. Is not used in
-        method options 'brute' and 'basinhopping'
-    Output
-    ------
-    parameters : DataFrame
-        alle geteste parametercombinaties
-    results : np.array
-        alle bekomen objectiefwaarden
-
-    """
-    parameters = []
-    results = []
-
-    def internal_opt_fun(X):
-        result = opt_fun(X)    # Bereken objectieffunctiewaarde voor de huidige set parameters
-        parameters.append(X)   # Tussentijdse parameter waarden bijhouden
-        results.append(result) # Tussentijdse SSE bijhouden
-        return result
-
-    if method in ['Nelder-Mead', 'BFGS', 'Powell']:
-        res = optimize.minimize(internal_opt_fun, X, method=method, tol=tol)
-    elif method == 'basinhopping':
-        res = optimize.basinhopping(internal_opt_fun, X)
-    elif method == 'brute':
-        bounds = [(0.01*i, 10*i) for i in X]
-        res = optimize.brute(internal_opt_fun, bounds)
-    elif method == 'differential evolution':
-        bounds = [(0.01*i, 100*i) for i in X]
-        res = optimize.differential_evolution(internal_opt_fun, bounds, tol=tol)
-    else:
-        raise ValueError('use correct optimisation algorithm, see docstring for options')
-    parameters = pd.DataFrame(np.array(parameters), columns=param_names)
-    results = np.array(results)
-
-    return parameters,results
 
 def plot_calib(parameters, results, i, data, sim_model):
     fig, ax = plt.subplots(figsize=figsize)
     data.plot(ax=ax, linestyle='', marker='.', markersize=15,
-              colors=[fivethirtyeight[0], fivethirtyeight[1]])
+              colors=[fivethirtyeight[0]])
     sim = sim_model(parameters.loc[i].values)
     sim.plot(ax=ax, linewidth=5,
-             colors=[fivethirtyeight[0], fivethirtyeight[1]])
+             colors=[fivethirtyeight[1]])
     ax.set_xlabel('Tijd')
     ax.set_ylabel('waarde variabelen');
     handles, labels = ax.get_legend_handles_labels()
@@ -227,37 +177,21 @@ def plot_calib(parameters, results, i, data, sim_model):
     ax.set_xlim(0.95*parameters[cols[0]].min(), 1.05*parameters[cols[0]].max())
     ax.set_ylim(0.95*parameters[cols[1]].min(), 1.05*parameters[cols[1]].max())
 
-def plot_contour_monod(optimizer):
+def plot_contour_rtd(optimizer):
     n_points = 30
-    mu_max = np.logspace(np.log10(0.001), np.log10(50), n_points)
-    K_S = np.logspace(np.log10(0.001), np.log10(10), n_points)
-    X_mu_max, X_K_S = np.meshgrid(mu_max, K_S)
-    Z = np.array([optimizer(params) for params in zip(X_mu_max.flatten(), X_K_S.flatten())])
+    beta = np.linspace(100, 500, n_points)
+    tau_0 = np.linspace(100, 500, n_points)
+    X_beta, X_tau_0 = np.meshgrid(beta, tau_0)
+    Z = np.array([optimizer(params) for params in zip(X_beta.flatten(), X_tau_0.flatten())])
     Z = Z.reshape((n_points, n_points))
+    lvls = np.logspace(math.log10(Z.min()), math.log10(Z.max()), 15)
     fig, ax = plt.subplots(figsize=(6,5))
-    sc = ax.contourf(X_mu_max, X_K_S, Z, cmap='viridis')
+    sc = ax.contourf(X_beta, X_tau_0, Z, cmap='viridis', norm=LogNorm(), levels=lvls)
+    ax.plot(206.003182, 373.223628, marker='o', color='white')
     cbar = plt.colorbar(sc)
-    cbar.set_ticks([0.05*Z.max(), 0.95*Z.max()])
+    cbar.set_ticks([1.1*Z.min(), 0.8*Z.max()])
     cbar.set_ticklabels(['lage waarde\nobjectieffunctie', 'hoge waarde\nobjectieffunctie'])
     ax.set_xscale('linear')
     ax.set_yscale('linear')
-    ax.set_xlabel('mu_max')
-    ax.set_ylabel('K_S')
-
-def plot_contour_force(optimizer):
-    n_points = 30
-    b = np.linspace(0, 2, n_points)
-    k = np.linspace(0, 2, n_points)
-    X_b, X_k = np.meshgrid(b, k)
-    Z = np.array([optimizer(params) for params in zip(X_b.flatten(), X_k.flatten())])
-    Z = np.log10(Z)
-    Z = Z.reshape((n_points, n_points))
-    fig, ax = plt.subplots(figsize=(6,5))
-    sc = ax.contourf(X_b, X_k, Z, cmap='viridis')
-    cbar = plt.colorbar(sc)
-    cbar.set_ticks([0.05*Z.max(), 0.95*Z.max()])
-    cbar.set_ticklabels(['lage waarde\nobjectieffunctie', 'hoge waarde\nobjectieffunctie'])
-    ax.set_xscale('linear')
-    ax.set_yscale('linear')
-    ax.set_xlabel('b')
-    ax.set_ylabel('k')
+    ax.set_xlabel('beta')
+    ax.set_ylabel('tau_0')
