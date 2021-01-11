@@ -203,10 +203,10 @@ def plot_calib(parameters, results, i, data, sim_model):
     fig, ax = plt.subplots(figsize=figsize)
     cols = data.columns
     data[cols].plot(ax=ax, linestyle='', marker='.', markersize=15,
-              colors=[fivethirtyeight[0], fivethirtyeight[1]])
+              color=[fivethirtyeight[0], fivethirtyeight[1]])
     sim = sim_model(parameters.loc[i].values)
     sim[cols].plot(ax=ax, linewidth=5,
-             colors=[fivethirtyeight[0], fivethirtyeight[1]])
+             color=[fivethirtyeight[0], fivethirtyeight[1]])
     ax.set_xlabel('Tijd')
     ax.set_ylabel('waarde variabelen');
     handles, labels = ax.get_legend_handles_labels()
