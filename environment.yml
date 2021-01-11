@@ -7,5 +7,5 @@ dependencies:
   - ipython
   - matplotlib
   - pandas
-  - python=3.5.1
+  - python
   - ipykernel
